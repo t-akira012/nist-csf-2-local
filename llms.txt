@@ -1,0 +1,5 @@
+# NIST CSF 2.0 local reference
+
+Start with generated/index.json. Open only the generated/sections/<ID>.md files relevant to the task.
+For Japanese, use ja/<ID>.md or run make ja ID=<ID> on demand.
+See AGENTS.md for source and translation boundaries.

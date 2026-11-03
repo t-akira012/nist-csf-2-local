@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "english_core": {
+    "title": "NIST Cybersecurity Framework 2.0 Reference Tool export",
+    "url": "https://csrc.nist.gov/extensions/nudp/services/json/csf/download?olirids=all",
+    "format": "xlsx"
+  },
+  "japanese_core": {
+    "title": "NIST Cybersecurity Framework (CSF) 2.0 Japanese translation, NIST CSWP 29 jpn",
+    "landing_page": "https://www.nist.gov/publications/nist-cybersecurity-framework-csf-20-japanese-translation",
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=959118",
+    "doi": "https://doi.org/10.6028/NIST.CSWP.29.jpn",
+    "format": "pdf"
+  }
+}
