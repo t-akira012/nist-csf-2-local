@@ -104,17 +104,25 @@ def validate():
     entries = parse_core(OUT / "source" / "csf2.xlsx")
     if set(index["items"]) != {item["id"] for item in entries}:
         raise ValueError("Index does not match English source")
-    from ja import official_japanese
-    if set(official_japanese(OUT / "source" / "csf2-jpn.pdf")) != set(index["items"]):
-        raise ValueError("Japanese CSF core IDs do not match the English CSF 2.0 core")
+    japanese_pdf = index["sources"]["japanese_core"]["url"]
+    links = {}
+    for line in (ROOT / "ja" / "index.md").read_text(encoding="utf-8").splitlines():
+        match = re.match(r"^\s*- \[([A-Z]{2}(?:\.[A-Z]{2}(?:-\d{2})?)?)(?: — [^]]+)?\]\(([^)]+)\)$", line)
+        if not match:
+            continue
+        ident, url = match.groups()
+        if ident in links or not url.startswith(japanese_pdf + "#page=") or not url.split("#page=")[1].isdigit():
+            raise ValueError(f"Invalid Japanese source link: {line}")
+        links[ident] = url
+    if set(links) != set(index["items"]):
+        raise ValueError("Japanese link list does not match the English CSF 2.0 core")
     for ident, meta in index["items"].items():
         if not (ROOT / meta["path"]).is_file():
             raise ValueError(f"Missing section: {ident}")
-    for key, filename in (("english_core", "csf2.xlsx"), ("japanese_core", "csf2-jpn.pdf")):
-        digest = hashlib.sha256((OUT / "source" / filename).read_bytes()).hexdigest()
-        if digest != index["sha256"][key]:
-            raise ValueError(f"Source hash changed: {filename}")
-    print(f"Validated {len(entries)} sections, Japanese IDs, and both source hashes", flush=True)
+    digest = hashlib.sha256((OUT / "source" / "csf2.xlsx").read_bytes()).hexdigest()
+    if digest != index["sha256"]["english_core"]:
+        raise ValueError("English source hash changed")
+    print(f"Validated {len(entries)} sections, Japanese links, and English source hash", flush=True)
 
 
 def main():
@@ -125,12 +133,9 @@ def main():
         validate()
         return
     sources = json.loads((ROOT / "sources.json").read_text(encoding="utf-8"))
-    filenames = {"english_core": "csf2.xlsx", "japanese_core": "csf2-jpn.pdf"}
-    hashes = {}
-    for key, filename in filenames.items():
-        path = OUT / "source" / filename
-        fetch(sources[key]["url"], path)
-        hashes[key] = hashlib.sha256(path.read_bytes()).hexdigest()
+    path = OUT / "source" / "csf2.xlsx"
+    fetch(sources["english_core"]["url"], path)
+    hashes = {"english_core": hashlib.sha256(path.read_bytes()).hexdigest()}
     entries = parse_core(OUT / "source" / "csf2.xlsx")
     write_core(entries, sources, hashes)
 
